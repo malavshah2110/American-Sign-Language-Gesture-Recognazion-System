@@ -1,0 +1,52 @@
+function [T_train, T_test, GT_test] = AS3(f_vector,filename,g, user)   
+    F = [];
+    F_test = [];
+    G_test = [];
+    count = 1;
+    count_test = 1;
+    for f = 1:1:10
+        filename1 = strcat(filename{f}, 'NewFeatureMatrix.csv');
+        M = xlsread(filename1);
+        first = 1;
+        for j=1:1:user-1
+            first = first + f_vector(f, j);
+        end
+        second = first + f_vector(f,user)-1;
+        n = ceil(0.6*f_vector(f,user));
+        n_test = f_vector(f,user) - n;
+        if user >= 1 && n ~= 0
+            x_train = first:1:(first+n-1);
+            x_test = (first+n):1:second;
+        elseif user > 1 && n==0
+            first = second+1;
+            second = second + f_vector(f,user+1);
+            continue;
+        end           
+        for i = 1:1:n_test
+            F_test = [F_test; M(x_test(i),:)];
+            if g == f
+
+                G_test(count_test) = 1;
+            else
+                G_test(count_test) = 0;
+            end
+            count_test = count_test + 1;              
+        end
+        for i = 1:1:n
+            F = [F; M(x_train(i),:)];
+            if g == f
+                G(count) = 1;
+            else
+                G(count) = 0;
+            end
+            count = count + 1;
+        end           
+    end
+    GT = array2table(G');
+    GT_test = G_test';
+    FT = array2table(F);
+    F = F_test;
+    T_test = array2table(F);
+    T_train = [FT GT];
+    T_train.Properties.VariableNames(237) = {'Class'};
+end
